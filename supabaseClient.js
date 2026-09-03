@@ -6,4 +6,14 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = 'https://ikjexnliqwpmvuwncowg.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_WrrmPg8P9_5wokTdGFw0jA_ZAXXL7Iy';
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Este app não usa login/autenticação — só leitura/escrita pública na tabela `albums`.
+// Desligamos a persistência de sessão para o cliente Supabase não tentar acessar
+// `localStorage` durante o build/prerender do Next.js (ambiente sem navegador),
+// o que causava falha no deploy.
+export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+  },
+});
