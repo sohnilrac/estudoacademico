@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { compressImage, withTimeout } from '../lib/compressImage';
 
 const TRACKED_MUSICIANS = [
   { name: 'Gordinho ⭐' }, { name: 'Luizão' }, { name: 'Wilson das Neves' },
@@ -23,14 +24,23 @@ export default function MyCollection({ albums, onRefresh }) {
       const album = albums.find(a => a.id === albumId);
       const newPhotos = [];
       for (const file of fileList) {
-        const path = `${albumId}/${uid()}-${file.name}`;
-        const { error: upErr } = await supabase.storage.from('covers').upload(path, file);
+        const compressed = await compressImage(file);
+        const path = `${albumId}/${uid()}-foto.jpg`;
+        const { error: upErr } = await withTimeout(
+          supabase.storage.from('covers').upload(path, compressed, { contentType: 'image/jpeg' }),
+          30000,
+          'enviar foto'
+        );
         if (upErr) throw upErr;
         const { data: pub } = supabase.storage.from('covers').getPublicUrl(path);
         newPhotos.push({ id: uid(), url: pub.publicUrl });
       }
       const updatedPhotos = [...(album.photos || []), ...newPhotos];
-      const { error: updErr } = await supabase.from('albums').update({ photos: updatedPhotos }).eq('id', albumId);
+      const { error: updErr } = await withTimeout(
+        supabase.from('albums').update({ photos: updatedPhotos }).eq('id', albumId),
+        15000,
+        'salvar no banco'
+      );
       if (updErr) throw updErr;
       onRefresh();
     } catch (e) {

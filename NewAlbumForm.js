@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { compressImage, withTimeout } from '../lib/compressImage';
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 const blankTrack = (side) => ({ id: uid(), side, number: 1, title: '', composers: [''] });
@@ -52,8 +53,13 @@ export default function NewAlbumForm({ onSaved }) {
       const newId = 'a' + uid();
       const uploadedPhotos = [];
       for (const file of photos) {
-        const path = `${newId}/${uid()}-${file.name}`;
-        const { error: upErr } = await supabase.storage.from('covers').upload(path, file);
+        const compressed = await compressImage(file);
+        const path = `${newId}/${uid()}-foto.jpg`;
+        const { error: upErr } = await withTimeout(
+          supabase.storage.from('covers').upload(path, compressed, { contentType: 'image/jpeg' }),
+          30000,
+          'enviar foto'
+        );
         if (upErr) throw upErr;
         const { data: pub } = supabase.storage.from('covers').getPublicUrl(path);
         uploadedPhotos.push({ id: uid(), url: pub.publicUrl });
