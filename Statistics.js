@@ -89,35 +89,7 @@ export default function Statistics({ albums }) {
           })}
         </div>
       </div>
-    </div> <div style={sectionStyle}>
-  <div style={titleStyle}>🎬 Produção — Rildo Hora</div>
-  {(() => {
-    const rildoAlbums = albums
-      .filter(a => (a.production_credits || []).some(p => p.name?.replace(' ⭐', '').trim() === 'Rildo Hora'))
-      .map(a => ({
-        title: a.title,
-        year: a.year,
-        roles: (a.production_credits || [])
-          .filter(p => p.name?.replace(' ⭐', '').trim() === 'Rildo Hora')
-          .map(p => p.role)
-          .join(', ')
-      }))
-      .sort((a, b) => (a.year || '').localeCompare(b.year || ''));
-
-    return (
-      <>
-        <div style={{ fontSize: 13, marginBottom: 8 }}>
-          Rildo Hora ⭐: {rildoAlbums.length} disco{rildoAlbums.length !== 1 ? 's' : ''}
-        </div>
-        {rildoAlbums.map((a, i) => (
-          <div key={i} style={{ fontSize: 11, color: '#5A4E3A', marginBottom: 4 }}>
-            {a.title} {a.year ? `(${a.year})` : ''} — {a.roles}
-          </div>
-        ))}
-      </>
-    );
-  })()}
-</div>
+    </div> 
   );
 }
 
