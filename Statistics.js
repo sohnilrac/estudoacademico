@@ -89,10 +89,7 @@ export default function Statistics({ albums }) {
           })}
         </div>
       </div>
-    </div>
-  );
-}
-<div style={sectionStyle}>
+    </div> <div style={sectionStyle}>
   <div style={titleStyle}>🎬 Produção — Rildo Hora</div>
   {(() => {
     const rildoAlbums = albums
@@ -121,3 +118,6 @@ export default function Statistics({ albums }) {
     );
   })()}
 </div>
+  );
+}
+
