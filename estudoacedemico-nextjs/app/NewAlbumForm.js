@@ -309,10 +309,58 @@ export default function NewAlbumForm({ onSaved }) {
       <div style={{ fontWeight: 700, fontSize: 13, marginTop: 16, marginBottom: 4 }}>Notas / Ficha técnica</div>
       <textarea style={{ ...inputStyle, minHeight: 80 }} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
 
-      <div style={{ fontWeight: 700, fontSize: 13, marginTop: 16, marginBottom: 4 }}>Fotos do disco</div>
-      <input type="file" accept="image/*" multiple onChange={e => setPhotos(Array.from(e.target.files || []))} style={{ fontSize: 12, marginBottom: 8 }} />
-      {photos.length > 0 && <div style={{ fontSize: 11, color: '#5A4E3A', marginBottom: 8 }}>{photos.length} foto(s) selecionada(s)</div>}
+<div style={{ fontWeight: 700, fontSize: 13, marginTop: 16, marginBottom: 4 }}>Fotos do disco</div>
+<input
+  type="file"
+  accept="image/*"
+  multiple
+  onChange={e => {
+    const newFiles = Array.from(e.target.files || []);
+    const newPhotos = newFiles.map(file => ({
+      id: uid(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+    setPhotos(prev => [...prev, ...newPhotos]);
+    e.target.value = '';
+  }}
+  style={{ fontSize: 12, marginBottom: 8 }}
+/>
 
+{photos.length > 0 && (
+  <>
+    <div style={{ fontSize: 11, color: '#5A4E3A', marginBottom: 8 }}>
+      {photos.length} foto(s) selecionada(s) — confira antes de salvar
+    </div>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+      {photos.map(p => (
+        <div key={p.id} style={{ position: 'relative', width: 80, height: 80 }}>
+          <img
+            src={p.previewUrl}
+            alt=""
+            style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, border: '1px solid #D8CBA8' }}
+          />
+          <button
+            onClick={() => {
+              URL.revokeObjectURL(p.previewUrl);
+              setPhotos(prev => prev.filter(x => x.id !== p.id));
+            }}
+            style={{
+              position: 'absolute', top: -6, right: -6,
+              background: '#8C2F1B', color: '#EDE3D0', border: 'none',
+              borderRadius: '50%', width: 20, height: 20, fontSize: 12,
+              cursor: 'pointer', lineHeight: '20px', padding: 0,
+            }}
+          >
+            ×
+          </button>
+        </div>
+      ))}
+    </div>
+  </>
+)}
+
+        
       <button onClick={handleSave} disabled={saving}
         style={{ background: '#8C2F1B', color: '#EDE3D0', border: 'none', borderRadius: 4, padding: '10px 20px', fontSize: 13, fontWeight: 700, cursor: saving ? 'default' : 'pointer', marginTop: 12 }}>
         {saving ? 'Salvando...' : 'Salvar Disco'}
