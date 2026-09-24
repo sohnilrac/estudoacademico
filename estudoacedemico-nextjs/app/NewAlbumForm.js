@@ -206,13 +206,14 @@ export default function NewAlbumForm({ onSaved }) {
     try {
       const newId = 'a' + uid();
       const uploadedPhotos = [];
-      for (const file of photos) {
-        const path = `${newId}/${uid()}-${file.name}`;
-        const { error: upErr } = await supabase.storage.from('covers').upload(path, file);
+      for (const p of photos) {
+        const path = `${newId}/${uid()}-${p.file.name}`;
+        const { error: upErr } = await supabase.storage.from('covers').upload(path, p.file);
         if (upErr) throw upErr;
         const { data: pub } = supabase.storage.from('covers').getPublicUrl(path);
         uploadedPhotos.push({ id: uid(), url: pub.publicUrl });
       }
+
 
       const cleanTracks = form.tracks
         .filter(t => t.title.trim())
