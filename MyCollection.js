@@ -82,7 +82,7 @@ export default function MyCollection({ albums, onRefresh }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', gap: 10, flex: 1, minWidth: 0 }}>
                 {album.photos?.[0] ? (
-                  <img src={album.photos[0].url} alt="Capa" loading="lazy"
+                 <img src={album.photos[0].url || album.photos[0].data} alt="Capa" loading="lazy"
                     style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: 4, flexShrink: 0, border: '1px solid #D8CBA8' }} />
                 ) : (
                   <div style={{ width: 44, height: 44, borderRadius: 4, flexShrink: 0, background: '#EDE3D0', border: '1px solid #D8CBA8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>💿</div>
@@ -127,7 +127,7 @@ export default function MyCollection({ albums, onRefresh }) {
                     <div style={{ fontSize: 10, color: '#5A4E3A', lineHeight: 1.5 }}>{album.notes}</div>
                   </>
                 )}
-
+<img src={p.url || p.data} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 4, border: '1px solid #D8CBA8' }} />
                 <div style={{ fontWeight: 700, marginTop: 12, marginBottom: 4 }}>Fotos</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {(album.photos || []).map(p => (
