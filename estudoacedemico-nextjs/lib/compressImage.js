@@ -1,0 +1,42 @@
+export function compressImage(file, maxDim = 1400, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round(height * (maxDim / width));
+            width = maxDim;
+          } else {
+            width = Math.round(width * (maxDim / height));
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error('Falha ao comprimir imagem'))),
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => reject(new Error('Não foi possível ler a imagem'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Falha ao abrir o arquivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
+export function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`Tempo esgotado ao ${label} (${Math.round(ms / 1000)}s) — provavelmente conexão lenta`)), ms)
+    ),
+  ]);
+}
