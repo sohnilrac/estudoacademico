@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { compressImage, withTimeout } from '../lib/compressImage';
 
 const TRACKED_MUSICIANS = [
   { name: 'Gordinho ⭐' }, { name: 'Luizão' }, { name: 'Wilson das Neves' },
@@ -23,16 +24,27 @@ export default function MyCollection({ albums, onRefresh }) {
       const album = albums.find(a => a.id === albumId);
       const newPhotos = [];
       for (const file of fileList) {
-        const path = `${albumId}/${uid()}-${file.name}`;
-        const { error: upErr } = await supabase.storage.from('covers').upload(path, file);
+        const compressed = await compressImage(file);
+        const path = `${albumId}/${uid()}-foto.jpg`;
+        const { error: upErr } = await withTimeout(
+          supabase.storage.from('covers').upload(path, compressed, { contentType: 'image/jpeg' }),
+          60000,
+          'enviar foto'
+        );
         if (upErr) throw upErr;
         const { data: pub } = supabase.storage.from('covers').getPublicUrl(path);
         newPhotos.push({ id: uid(), url: pub.publicUrl });
       }
       const updatedPhotos = [...(album.photos || []), ...newPhotos];
-      const { error: updErr } = await supabase.from('albums').update({ photos: updatedPhotos }).eq('id', albumId);
+      const { data: saved, error: updErr } = await withTimeout(
+        supabase.from('albums').update({ photos: updatedPhotos }).eq('id', albumId).select('id'),
+        20000,
+        'salvar no banco'
+      );
       if (updErr) throw updErr;
+      if (!saved || saved.length === 0) throw new Error('a foto subiu, mas o banco não gravou no disco (permissão de UPDATE na tabela albums)');
       onRefresh();
+      alert(`${newPhotos.length} foto(s) salva(s) ✅`);
     } catch (e) {
       alert('Erro ao anexar foto: ' + e.message);
     } finally {
@@ -72,7 +84,7 @@ export default function MyCollection({ albums, onRefresh }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', gap: 10, flex: 1, minWidth: 0 }}>
                 {album.photos?.[0] ? (
-                  <img src={album.photos[0].url} alt="Capa" loading="lazy"
+                  <img src={album.photos[0].url || album.photos[0].data} alt="Capa" loading="lazy"
                     style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: 4, flexShrink: 0, border: '1px solid #D8CBA8' }} />
                 ) : (
                   <div style={{ width: 44, height: 44, borderRadius: 4, flexShrink: 0, background: '#EDE3D0', border: '1px solid #D8CBA8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>💿</div>
@@ -122,7 +134,7 @@ export default function MyCollection({ albums, onRefresh }) {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {(album.photos || []).map(p => (
                     <div key={p.id} style={{ position: 'relative' }}>
-                      <img src={p.url} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 4, border: '1px solid #D8CBA8' }} />
+                      <img src={p.url || p.data} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 4, border: '1px solid #D8CBA8' }} />
                       <button onClick={() => handleRemovePhoto(album.id, p.id)} style={{ position: 'absolute', top: -6, right: -6, background: '#8C2F1B', color: '#EDE3D0', border: 'none', borderRadius: '50%', width: 18, height: 18, cursor: 'pointer', fontSize: 10 }}>×</button>
                     </div>
                   ))}
