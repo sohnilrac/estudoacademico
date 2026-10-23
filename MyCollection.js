@@ -158,3 +158,4 @@ export default function MyCollection({ albums, onRefresh }) {
     </div>
   );
 }
+
