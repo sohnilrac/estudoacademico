@@ -5,6 +5,7 @@ import MyCollection from './MyCollection';
 import NewAlbumForm from './NewAlbumForm';
 import Statistics from './Statistics';
 import YearView from './YearView';
+import ArtistView from './ArtistView';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,9 @@ export default function Home() {
           <button onClick={() => setTab('ano')} style={{ background: 'none', border: tab === 'ano' ? '2px solid #8C2F1B' : 'none', color: tab === 'ano' ? '#8C2F1B' : '#5A4E3A', cursor: 'pointer', fontSize: 12, padding: '6px 12px', fontWeight: tab === 'ano' ? 700 : 400 }}>
             📅 Por Ano
           </button>
+          <button onClick={() => setTab('artista')} style={{ background: 'none', border: tab === 'artista' ? '2px solid #8C2F1B' : 'none', color: tab === 'artista' ? '#8C2F1B' : '#5A4E3A', cursor: 'pointer', fontSize: 12, padding: '6px 12px', fontWeight: tab === 'artista' ? 700 : 400 }}>
+            🎤 Por Artista
+          </button>
           <button onClick={() => setTab('novo')} style={{ background: 'none', border: tab === 'novo' ? '2px solid #8C2F1B' : 'none', color: tab === 'novo' ? '#8C2F1B' : '#5A4E3A', cursor: 'pointer', fontSize: 12, padding: '6px 12px', fontWeight: tab === 'novo' ? 700 : 400 }}>
             📷 Novo Disco
           </button>
@@ -64,6 +68,7 @@ export default function Home() {
 
         {!loading && tab === 'colecao' && <MyCollection albums={albums} onRefresh={loadAlbums} />}
         {!loading && tab === 'ano' && <YearView albums={albums} onRefresh={loadAlbums} />}
+        {!loading && tab === 'artista' && <ArtistView albums={albums} onRefresh={loadAlbums} />}
         {!loading && tab === 'novo' && <NewAlbumForm onSaved={loadAlbums} />}
         {!loading && tab === 'stats' && <Statistics albums={albums} />}
       </div>
